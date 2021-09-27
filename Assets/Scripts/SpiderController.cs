@@ -17,7 +17,6 @@ public class SpiderController : MonoBehaviour
 	public float acceleration = -4f;
 	public float jumpVelocity = 4;
 	public float movementSpeed = 4f;
-	public float swingConstant = 1;
 	public GameObject[] floorPieces;
 	public GameObject[] swingNodes;
     void Start()
@@ -84,7 +83,7 @@ public class SpiderController : MonoBehaviour
 			webRenderer.SetPosition(1, closestNode.transform.position);
 			//DrawLine(closestNode.transform.position, transform.position, Color.blue);
 			position = closestNode.transform.position + swingingDist * new Vector3(Mathf.Sin(theta), Mathf.Cos(theta), 0);
-			omega += -Mathf.Sin(theta) * swingConstant * Time.deltaTime;
+			omega += (acceleration / swingingDist) * Mathf.Sin(theta) * Time.deltaTime;
 			theta += omega*Time.deltaTime;
 			position = closestNode.transform.position - swingingDist * new Vector3(-Mathf.Sin(theta), Mathf.Cos(theta));
 		}
