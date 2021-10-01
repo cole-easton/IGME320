@@ -46,6 +46,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public GameObject playerModel;
         public GameObject debugWebTrajectory;
 
+        private bool isSwinging = false;
         private bool pressingUp = false;
         private bool pressingLeft = false;
         private bool pressingDown = false;
@@ -103,7 +104,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void FireWeb()
         {
-            Debug.Log("fired web");
+            if (!isSwinging)
+            {
+                Debug.Log("fired web");
+                isSwinging = true;
+            }
+            else
+            {
+                Debug.Log("detached from web");
+                isSwinging = false;
+            }
         }
 
         private void RotateWebAim()
@@ -189,7 +199,14 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private void FixedUpdate()
         {
             float speed;
-            GetInput(out speed);
+            if (!isSwinging)
+            {
+                GetInput(out speed);
+            }
+            else
+            {
+                speed = 0;
+            }
             // always move along the camera forward as it is the direction that it being aimed at
             Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
 
