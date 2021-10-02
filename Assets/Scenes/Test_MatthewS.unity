@@ -165,6 +165,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   simulateOnStart: 0
+  dampening: 0
   head:
     point:
       position: {x: 4.1, y: 0, z: 0}

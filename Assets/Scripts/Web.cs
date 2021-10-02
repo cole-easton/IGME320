@@ -11,7 +11,9 @@ public class Web : MonoBehaviour
     //------------------------------------------members-----------------------------------//
 
     [SerializeField]
-    private bool simulateOnStart;
+    private bool simulateOnStart;   // should the rope pre-simulate when it is created?    NOT IMPLEMENTED
+    [SerializeField] [Range(0, 0.1f)]
+    private float dampening;        // how much the rope swinging is dampened
 
     [Space]
 
@@ -55,7 +57,6 @@ public class Web : MonoBehaviour
 
         points = new List<RopePoint>();
         segments = new List<RopeSegment>();
-
 
 
         bool headLocked = head.isLocked;
@@ -118,13 +119,29 @@ public class Web : MonoBehaviour
             point.oldPosition = point.position;
 
             // if the point is an end point thats isnt supposed to move by physics then don't move it
-            if ((point == head.point && head.IsStatic) || (point == tail.point && tail.IsStatic))
+            if ((point == head.point && head.isLocked) || (point == tail.point && tail.isLocked))
                 continue;
+
+            if (point == head.point && head.attachment)
+            {
+                Vector3 pos = head.attachment.transform.TransformPoint(head.attachmentPoint);   // the position of the attachment point in world space
+                Vector3 dif = pos - tail.point.position;                                        // the vector from tail to the attachment point
+                head.point.position = tail.point.position + Vector3.ClampMagnitude(dif, length);    // set the head to be towards the attachment point, but clamped to be within length
+                continue;
+            }
+            if (point == tail.point && tail.attachment)
+            {
+                Vector3 pos = tail.attachment.transform.TransformPoint(tail.attachmentPoint);   // the position of the attachment point in world space
+                Vector3 dif = pos - head.point.position;                                        // the vector from tail to the attachment point
+                head.point.position = head.point.position + Vector3.ClampMagnitude(dif, length);    // set the head to be towards the attachment point, but clamped to be within length
+                continue;
+            }
+
 
             // velocity is assumed to be the same as the velocity in the previous frame
             Vector3 velocity = point.position - oldPos;
 
-            point.position += velocity;
+            point.position += velocity * (1 - dampening);
             point.position += Physics.gravity * Time.fixedDeltaTime * Time.fixedDeltaTime;
         }
     }
@@ -140,23 +157,6 @@ public class Web : MonoBehaviour
             // this helps remove jitter
             buffer.Clear();
             buffer.AddRange(segments);
-            
-            // if the head or tail has an attached object, move the point to the attached point on the object if the object is inside the length of the rope
-            // otherwise it will be a point on the max length of the rope
-            if (head.attachment)
-            {
-                Vector3 pos = head.attachment.transform.TransformPoint(head.attachmentPoint);   // the position of the attachment point in world space
-                Vector3 dir = pos - tail.point.position;
-                pos = tail.point.position + Vector3.ClampMagnitude(dir, length);
-                head.point.position = pos;
-            }
-            if (tail.attachment)
-            {
-                Vector3 pos = tail.attachment.transform.TransformPoint(tail.attachmentPoint);   // the position of the attachment point in world space
-                Vector3 dir = pos - head.point.position;
-                pos = head.point.position + Vector3.ClampMagnitude(dir, length);
-                tail.point.position = pos;
-            }
 
             while (buffer.Count > 0)
             {
@@ -164,21 +164,21 @@ public class Web : MonoBehaviour
                 RopeSegment segment = buffer[index];
                 buffer.RemoveAt(index);
 
-                Vector3 dir = (segment.A.position - segment.B.position).normalized;
+                Vector3 dir = (segment.A.position - segment.B.position).normalized;     // the direction vector from the tail side point to the head side point
 
-                if (segment.A == head.point && head.IsStatic)
+                if (segment.A == head.point && (head.isLocked || head.attachment))
                 {
-                    segment.B.position = segment.A.position - (dir * segment.length);
+                    segment.B.position = segment.A.position - (dir * segment.length);   // move the tail side point so it is segment length away from the head side point
                 }
-                else if (segment.B == tail.point && tail.IsStatic)
+                else if (segment.B == tail.point && (tail.isLocked || tail.attachment))
                 {
-                    segment.A.position = segment.B.position + (dir * segment.length);
+                    segment.A.position = segment.B.position + (dir * segment.length);   // move the head side point so it is segment length away from the tail side point
                 }
                 else
                 {
-                    Vector3 midpoint = (segment.A.position + segment.B.position) / 2;
-                    segment.A.position = midpoint + (dir * segment.length / 2);
-                    segment.B.position = midpoint - (dir * segment.length / 2);
+                    Vector3 midpoint = (segment.A.position + segment.B.position) / 2;   // find the midpoint between the two points
+                    segment.A.position = midpoint + (dir * segment.length / 2);         // move both points so they are a half length from the midpoint
+                    segment.B.position = midpoint - (dir * segment.length / 2);         // two half lengths make a full length
                 }
             }
         }
@@ -192,18 +192,18 @@ public class Web : MonoBehaviour
             if (rb != null && rb.isKinematic == false)
             {
                 Vector3 attachPoint = head.attachment.transform.TransformPoint(head.attachmentPoint);   // the attach point in world space
+
+                // set the position of the attachment so that the attach point is where the end point is
+                head.attachment.transform.position = head.attachment.transform.position - (attachPoint - head.point.position);
+
+                // check if the attach point has moved outside the length of the rope
                 if ((attachPoint - tail.point.position).magnitude > length)
                 {
-                    // set the position of the attachment so that the attach point is where the end point it
-                    head.attachment.transform.position = head.attachment.transform.position - (attachPoint - head.point.position);
-
-                    Vector3 dir = HeadDirection.normalized;
-                    Vector3 attachVelocity = rb.GetPointVelocity(attachPoint);
-                    if (Vector3.Dot(attachVelocity, dir) > 0)
+                    Vector3 attachVelocity = rb.GetPointVelocity(attachPoint);  // the velocity of the point on the rigidbody
+                    if (Vector3.Dot(attachVelocity, attachPoint - tail.point.position) > 0)     // if the velocity vector is pointing outside the circle formed by the rope
                     {
-                        Vector3 forceVector = Vector3.Project(attachVelocity, dir);
-                        Debug.Log(forceVector);
-                        rb.AddForceAtPosition(forceVector, attachPoint, ForceMode.VelocityChange);
+                        // Add a velocity change inwards towards the rope circle so that the new velocity is tangential to the circle
+                        rb.AddForceAtPosition(-Vector3.Project(attachVelocity, attachPoint - tail.point.position), attachPoint, ForceMode.VelocityChange);
                     }
                 }
             }
