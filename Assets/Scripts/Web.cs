@@ -209,12 +209,25 @@ public class Web : MonoBehaviour
             }
         }
 
-        // UNFINISHED
         if (IsTailAttached)
         {
             Rigidbody rb = tail.attachment.GetComponent<Rigidbody>();
             if (rb != null && rb.isKinematic == false)
-                tail.attachment.transform.position = tail.attachment.transform.position - (tail.attachment.transform.TransformPoint(tail.attachmentPoint) - tail.point.position);
+                Vector3 attachPoint = tail.attachment.transform.TransformPoint(head.attachmentPoint);   // the attach point in world space
+
+            // set the position of the attachment so that the attach point is where the end point is
+            tail.attachment.transform.position = tail.attachment.transform.position - (attachPoint - tail.point.position);
+
+            // check if the attach point has moved outside the length of the rope
+            if ((attachPoint - head.point.position).magnitude > length)
+            {
+                Vector3 attachVelocity = rb.GetPointVelocity(attachPoint);  // the velocity of the point on the rigidbody
+                if (Vector3.Dot(attachVelocity, attachPoint - head.point.position) > 0)     // if the velocity vector is pointing outside the circle formed by the rope
+                {
+                    // Add a velocity change inwards towards the rope circle so that the new velocity is tangential to the circle
+                    rb.AddForceAtPosition(-Vector3.Project(attachVelocity, attachPoint - head.point.position), attachPoint, ForceMode.VelocityChange);
+                }
+            }
         }
     }
 
