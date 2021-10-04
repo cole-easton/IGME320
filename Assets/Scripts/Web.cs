@@ -133,7 +133,7 @@ public class Web : MonoBehaviour
             {
                 Vector3 pos = tail.attachment.transform.TransformPoint(tail.attachmentPoint);   // the position of the attachment point in world space
                 Vector3 dif = pos - head.point.position;                                        // the vector from tail to the attachment point
-                head.point.position = head.point.position + Vector3.ClampMagnitude(dif, length);    // set the head to be towards the attachment point, but clamped to be within length
+                tail.point.position = head.point.position + Vector3.ClampMagnitude(dif, length);    // set the head to be towards the attachment point, but clamped to be within length
                 continue;
             }
 
