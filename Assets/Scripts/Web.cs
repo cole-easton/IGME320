@@ -219,7 +219,7 @@ namespace Spider
                 Rigidbody rb = tail.attachment.GetComponent<Rigidbody>();
                 if (rb != null && rb.isKinematic == false)
                 {
-                    Vector3 attachPoint = tail.attachment.transform.TransformPoint(head.attachmentPoint);   // the attach point in world space
+                    Vector3 attachPoint = tail.attachment.transform.TransformPoint(tail.attachmentPoint);   // the attach point in world space
 
                     // set the position of the attachment so that the attach point is where the end point is
                     tail.attachment.transform.position = tail.attachment.transform.position - (attachPoint - tail.point.position);
