@@ -48,7 +48,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public GameObject mainCamera;
         public GameObject playerModel;
         public GameObject debugWebTrajectory;
-        public GameObject WebTest;
+        
+        [SerializeField] private Web webScript;
 
         private bool isSwinging = false;
         private bool pressingUp = false;
@@ -72,8 +73,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
             //m_MouseLook.Init(transform , m_Camera.transform);
-            WebTest = GameObject.Find("Web_Test");
-            Web webScript = WebTest.GetComponent<Web>();
         }
 
 
@@ -113,20 +112,23 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (!isSwinging)
             {
                 Debug.Log("fired web");
-                GameObject web = Instantiate(WebTest);
-                Web webScript = web.GetComponent<Web>();
-                webScript.TailPosition = m_Camera.transform.position;
-                webScript.HeadPosition = new Vector3(m_Camera.transform.position.x + 3, m_Camera.transform.position.y + 4, m_Camera.transform.position.z);
-                //webScript.DestroyRope();
-                //webScript.CreateRope(webScript.HeadPosition, webScript.TailPosition);
+                webScript.CreateRope(new Vector3(this.gameObject.transform.position.x + 3, this.gameObject.transform.position.y + 4, this.gameObject.transform.position.z), this.gameObject.transform.position);
                 webScript.IsHeadLocked = true;
-                webScript.IsTailLocked = true;
+                webScript.AttachTail(this.gameObject);
                 isSwinging = true;
+                this.gameObject.GetComponent<Rigidbody>().isKinematic = false;
+                this.gameObject.GetComponent<CharacterController>().enabled = false;
             }
             else
             {
                 Debug.Log("detached from web");
+                webScript.DetachTail();
                 isSwinging = false;
+                Vector3 newVelocity = this.gameObject.GetComponent<Rigidbody>().velocity;
+                Debug.Log("Rigidbody velocity after detaching: " + this.gameObject.GetComponent<Rigidbody>().velocity);
+                this.gameObject.GetComponent<Rigidbody>().isKinematic = true;
+                this.gameObject.GetComponent<CharacterController>().enabled = true;
+                m_MoveDir = newVelocity;
             }
         }
 
@@ -248,9 +250,19 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             else
             {
-                m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
+                if (!isSwinging)
+                {
+                    m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
+                }
             }
-            m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
+            if (!isSwinging)
+            {
+                m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
+            }
+            else
+            {
+
+            }
 
             ProgressStepCycle(speed);
             UpdateCameraPosition(speed);
