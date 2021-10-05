@@ -71,6 +71,7 @@ namespace Spider
             GameObject tailAttachment = tail.attachment;
             Vector3 tailAttach = tail.attachmentPoint;
 
+            isAlive = false;
 
             CreateRope(head.point.position, tail.point.position);
 
