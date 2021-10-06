@@ -57,6 +57,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private bool pressingDown = false;
         private bool pressingRight = false;
 
+        private float playerModelAngle = 90f;
+
         // Use this for initialization
         private void Start()
         {
@@ -111,17 +113,27 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             if (!isSwinging)
             {
-                Debug.Log("fired web");
-                webScript.CreateRope(new Vector3(this.gameObject.transform.position.x + 3, this.gameObject.transform.position.y + 4, this.gameObject.transform.position.z), this.gameObject.transform.position);
-                webScript.IsHeadLocked = true;
-                webScript.AttachTail(this.gameObject);
-                isSwinging = true;
-                this.gameObject.GetComponent<Rigidbody>().isKinematic = false;
-                this.gameObject.GetComponent<CharacterController>().enabled = false;
+                if (Physics.Raycast(this.gameObject.transform.position, 
+                    new Vector3(3 * Mathf.Cos(playerModelAngle * Mathf.PI / 180), 4, 3 * Mathf.Sin(playerModelAngle * Mathf.PI / 180)), 
+                    out RaycastHit hitInfo, 5))
+                {
+                    webScript.CreateRope(hitInfo.point, this.gameObject.transform.position);
+                    webScript.IsHeadLocked = true;
+                    webScript.AttachTail(this.gameObject);
+                    isSwinging = true;
+                    this.gameObject.GetComponent<Rigidbody>().isKinematic = false;
+                    this.gameObject.GetComponent<CharacterController>().enabled = false;
+                }
+                else
+                {
+                    webScript.CreateRope(this.gameObject.transform.position + 
+                        new Vector3(3 * Mathf.Cos(playerModelAngle * Mathf.PI / 180), 4, 3 * Mathf.Sin(playerModelAngle * Mathf.PI / 180)), 
+                        this.gameObject.transform.position);
+                }
+                
             }
             else
             {
-                Debug.Log("detached from web");
                 webScript.DetachTail();
                 isSwinging = false;
                 Vector3 newVelocity = this.gameObject.GetComponent<Rigidbody>().velocity;
@@ -134,35 +146,35 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void RotateWebAim()
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow))
+            if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
             {
                 pressingUp = true;
             }
-            if (Input.GetKeyUp(KeyCode.UpArrow))
+            else
             {
                 pressingUp = false;
             }
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
             {
                 pressingLeft = true;
             }
-            if (Input.GetKeyUp(KeyCode.LeftArrow))
+            else
             {
                 pressingLeft = false;
             }
-            if (Input.GetKeyDown(KeyCode.DownArrow))
+            if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
             {
                 pressingDown = true;
             }
-            if (Input.GetKeyUp(KeyCode.DownArrow))
+            else
             {
                 pressingDown = false;
             }
-            if (Input.GetKeyDown(KeyCode.RightArrow))
+            if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
             {
                 pressingRight = true;
             }
-            if (Input.GetKeyUp(KeyCode.RightArrow))
+            else
             {
                 pressingRight = false;
             }
@@ -170,34 +182,42 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (pressingUp && pressingLeft)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -45, 0);
+                playerModelAngle = 135f;
             }
             else if (pressingDown && pressingLeft)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -135, 0);
+                playerModelAngle = 225f;
             }
             else if (pressingDown && pressingRight)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -225, 0);
+                playerModelAngle = 315f;
             }
             else if (pressingUp && pressingRight)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -315, 0);
+                playerModelAngle = 45f;
             }
             else if (pressingUp)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, 0, 0);
+                playerModelAngle = 90f;
             }
             else if (pressingLeft)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -90, 0);
+                playerModelAngle = 180f;
             }
             else if (pressingDown)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -180, 0);
+                playerModelAngle = 270f;
             }
             else if (pressingRight)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -270, 0);
+                playerModelAngle = 0f;
             }
 
             debugWebTrajectory.transform.localRotation = Quaternion.Euler(45, 0, 0);
