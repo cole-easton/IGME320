@@ -113,7 +113,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             if (!isSwinging)
             {
-                Debug.Log("fired web");
                 if (Physics.Raycast(this.gameObject.transform.position, 
                     new Vector3(3 * Mathf.Cos(playerModelAngle * Mathf.PI / 180), 4, 3 * Mathf.Sin(playerModelAngle * Mathf.PI / 180)), 
                     out RaycastHit hitInfo, 5))
@@ -135,7 +134,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             else
             {
-                Debug.Log("detached from web");
                 webScript.DetachTail();
                 isSwinging = false;
                 Vector3 newVelocity = this.gameObject.GetComponent<Rigidbody>().velocity;
@@ -148,35 +146,35 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void RotateWebAim()
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow))
+            if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
             {
                 pressingUp = true;
             }
-            if (Input.GetKeyUp(KeyCode.UpArrow))
+            else
             {
                 pressingUp = false;
             }
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
             {
                 pressingLeft = true;
             }
-            if (Input.GetKeyUp(KeyCode.LeftArrow))
+            else
             {
                 pressingLeft = false;
             }
-            if (Input.GetKeyDown(KeyCode.DownArrow))
+            if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
             {
                 pressingDown = true;
             }
-            if (Input.GetKeyUp(KeyCode.DownArrow))
+            else
             {
                 pressingDown = false;
             }
-            if (Input.GetKeyDown(KeyCode.RightArrow))
+            if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
             {
                 pressingRight = true;
             }
-            if (Input.GetKeyUp(KeyCode.RightArrow))
+            else
             {
                 pressingRight = false;
             }
