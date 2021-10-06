@@ -48,13 +48,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public GameObject mainCamera;
         public GameObject playerModel;
         public GameObject debugWebTrajectory;
-        public GameObject WebTest;
+        
+        [SerializeField] private Web webScript;
 
         private bool isSwinging = false;
         private bool pressingUp = false;
         private bool pressingLeft = false;
         private bool pressingDown = false;
         private bool pressingRight = false;
+
+        private float playerModelAngle = 90f;
 
         // Use this for initialization
         private void Start()
@@ -72,8 +75,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
             //m_MouseLook.Init(transform , m_Camera.transform);
-            WebTest = GameObject.Find("Web_Test");
-            Web webScript = WebTest.GetComponent<Web>();
         }
 
 
@@ -112,55 +113,68 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             if (!isSwinging)
             {
-                Debug.Log("fired web");
-                GameObject web = Instantiate(WebTest);
-                Web webScript = web.GetComponent<Web>();
-                webScript.TailPosition = m_Camera.transform.position;
-                webScript.HeadPosition = new Vector3(m_Camera.transform.position.x + 3, m_Camera.transform.position.y + 4, m_Camera.transform.position.z);
-                //webScript.DestroyRope();
-                //webScript.CreateRope(webScript.HeadPosition, webScript.TailPosition);
-                webScript.IsHeadLocked = true;
-                webScript.IsTailLocked = true;
-                isSwinging = true;
+                if (Physics.Raycast(this.gameObject.transform.position, 
+                    new Vector3(3 * Mathf.Cos(playerModelAngle * Mathf.PI / 180), 4, 3 * Mathf.Sin(playerModelAngle * Mathf.PI / 180)), 
+                    out RaycastHit hitInfo, 5))
+                {
+                    webScript.CreateRope(hitInfo.point, this.gameObject.transform.position);
+                    webScript.IsHeadLocked = true;
+                    webScript.AttachTail(this.gameObject);
+                    isSwinging = true;
+                    this.gameObject.GetComponent<Rigidbody>().isKinematic = false;
+                    this.gameObject.GetComponent<CharacterController>().enabled = false;
+                }
+                else
+                {
+                    webScript.CreateRope(this.gameObject.transform.position + 
+                        new Vector3(3 * Mathf.Cos(playerModelAngle * Mathf.PI / 180), 4, 3 * Mathf.Sin(playerModelAngle * Mathf.PI / 180)), 
+                        this.gameObject.transform.position);
+                }
+                
             }
             else
             {
-                Debug.Log("detached from web");
+                webScript.DetachTail();
                 isSwinging = false;
+                Vector3 newVelocity = this.gameObject.GetComponent<Rigidbody>().velocity;
+                Debug.Log("Rigidbody velocity after detaching: " + this.gameObject.GetComponent<Rigidbody>().velocity);
+                this.gameObject.GetComponent<Rigidbody>().isKinematic = true;
+                this.gameObject.GetComponent<CharacterController>().enabled = true;
+                m_MoveDir = newVelocity;
             }
         }
 
         private void RotateWebAim()
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow))
+            if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
             {
                 pressingUp = true;
             }
-            if (Input.GetKeyUp(KeyCode.UpArrow))
+            else
             {
                 pressingUp = false;
             }
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
             {
                 pressingLeft = true;
             }
-            if (Input.GetKeyUp(KeyCode.LeftArrow))
+            else
             {
                 pressingLeft = false;
             }
-            if (Input.GetKeyDown(KeyCode.DownArrow))
+            if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
             {
                 pressingDown = true;
             }
-            if (Input.GetKeyUp(KeyCode.DownArrow))
+            else
             {
                 pressingDown = false;
             }
-            if (Input.GetKeyDown(KeyCode.RightArrow))
+            if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
             {
                 pressingRight = true;
             }
-            if (Input.GetKeyUp(KeyCode.RightArrow))
+            else
             {
                 pressingRight = false;
             }
@@ -168,34 +182,42 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (pressingUp && pressingLeft)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -45, 0);
+                playerModelAngle = 135f;
             }
             else if (pressingDown && pressingLeft)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -135, 0);
+                playerModelAngle = 225f;
             }
             else if (pressingDown && pressingRight)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -225, 0);
+                playerModelAngle = 315f;
             }
             else if (pressingUp && pressingRight)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -315, 0);
+                playerModelAngle = 45f;
             }
             else if (pressingUp)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, 0, 0);
+                playerModelAngle = 90f;
             }
             else if (pressingLeft)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -90, 0);
+                playerModelAngle = 180f;
             }
             else if (pressingDown)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -180, 0);
+                playerModelAngle = 270f;
             }
             else if (pressingRight)
             {
                 playerModel.transform.localRotation = Quaternion.Euler(0, -270, 0);
+                playerModelAngle = 0f;
             }
 
             debugWebTrajectory.transform.localRotation = Quaternion.Euler(45, 0, 0);
@@ -248,9 +270,19 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             else
             {
-                m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
+                if (!isSwinging)
+                {
+                    m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
+                }
             }
-            m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
+            if (!isSwinging)
+            {
+                m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
+            }
+            else
+            {
+
+            }
 
             ProgressStepCycle(speed);
             UpdateCameraPosition(speed);
