@@ -128,19 +128,9 @@ namespace Spider
                     continue;
 
                 if (point == head.point && head.attachment)
-                {
-                    Vector3 pos = head.attachment.transform.TransformPoint(head.attachmentPoint);   // the position of the attachment point in world space
-                    Vector3 dif = pos - tail.point.position;                                        // the vector from tail to the attachment point
-                    head.point.position = tail.point.position + Vector3.ClampMagnitude(dif, length);    // set the head to be towards the attachment point, but clamped to be within length
                     continue;
-                }
                 if (point == tail.point && tail.attachment)
-                {
-                    Vector3 pos = tail.attachment.transform.TransformPoint(tail.attachmentPoint);   // the position of the attachment point in world space
-                    Vector3 dif = pos - head.point.position;                                        // the vector from tail to the attachment point
-                    tail.point.position = head.point.position + Vector3.ClampMagnitude(dif, length);    // set the head to be towards the attachment point, but clamped to be within length
                     continue;
-                }
 
 
                 // velocity is assumed to be the same as the velocity in the previous frame
@@ -149,6 +139,24 @@ namespace Spider
                 point.position += velocity * (1 - dampening);
                 point.position += Physics.gravity * Time.fixedDeltaTime * Time.fixedDeltaTime;
             }
+
+            // move the head and tail so they are where the attachments are, but also length distance apart
+            Vector3 newHeadPos = head.point.position;
+            Vector3 newTailPos = tail.point.position;
+            if (head.attachment)
+            {
+                Vector3 pos = head.attachment.transform.TransformPoint(head.attachmentPoint);   // the position of the attachment point in world space
+                Vector3 dif = pos - tail.point.position;                                        // the vector from tail to the attachment point
+                newHeadPos = tail.point.position + Vector3.ClampMagnitude(dif, length);    // set the head to be towards the attachment point, but clamped to be within length
+            }
+            if (tail.attachment)
+            {
+                Vector3 pos = tail.attachment.transform.TransformPoint(tail.attachmentPoint);   // the position of the attachment point in world space
+                Vector3 dif = pos - head.point.position;                                        // the vector from tail to the attachment point
+                newTailPos = head.point.position + Vector3.ClampMagnitude(dif, length);    // set the head to be towards the attachment point, but clamped to be within length
+            }
+            head.point.position = newHeadPos;
+            tail.point.position = newTailPos;
         }
 
         private void Constraint()
@@ -181,9 +189,9 @@ namespace Spider
                     }
                     else
                     {
-                        Vector3 midpoint = (segment.A.position + segment.B.position) / 2;   // find the midpoint between the two points
-                        segment.A.position = midpoint + (dir * segment.length / 2);         // move both points so they are a half length from the midpoint
-                        segment.B.position = midpoint - (dir * segment.length / 2);         // two half lengths make a full length
+                        Vector3 midpoint = (segment.A.position + segment.B.position) / 2.0f;   // find the midpoint between the two points
+                        segment.A.position = midpoint + (dir * segment.length / 2.0f);         // move both points so they are a half length from the midpoint
+                        segment.B.position = midpoint - (dir * segment.length / 2.0f);         // two half lengths make a full length
                     }
                 }
             }
