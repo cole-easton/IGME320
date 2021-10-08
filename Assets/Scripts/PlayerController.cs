@@ -32,7 +32,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
 
-        private UnityEngine.Camera m_Camera;
+        //private UnityEngine.Camera m_Camera;
         private bool m_Jump;
         private float m_YRotation;
         private Vector2 m_Input;
@@ -47,7 +47,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private AudioSource m_AudioSource;
         public GameObject mainCamera;
         public GameObject playerModel;
-        public GameObject debugWebTrajectory;
+        //public GameObject debugWebTrajectory;
         
         [SerializeField] private Web webScript;
 
@@ -63,13 +63,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private void Start()
         {
             mainCamera = GameObject.Find("Main Camera");
-            playerModel = GameObject.Find("Capsule");
-            debugWebTrajectory = GameObject.Find("Cylinder");
+            playerModel = GameObject.Find("spider");
+            //debugWebTrajectory = GameObject.Find("Cylinder");
             m_CharacterController = GetComponent<CharacterController>();
-            m_Camera = UnityEngine.Camera.main;
+            //m_Camera = UnityEngine.Camera.main;
             m_OriginalCameraPosition = mainCamera.transform.position;
-            m_FovKick.Setup(m_Camera);
-            m_HeadBob.Setup(m_Camera, m_StepInterval);
+            //m_FovKick.Setup(m_Camera);
+            //m_HeadBob.Setup(m_Camera, m_StepInterval);
             m_StepCycle = 0f;
             m_NextStep = m_StepCycle / 2f;
             m_Jumping = false;
@@ -137,7 +137,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 webScript.DetachTail();
                 isSwinging = false;
                 Vector3 newVelocity = this.gameObject.GetComponent<Rigidbody>().velocity;
-                Debug.Log("Rigidbody velocity after detaching: " + this.gameObject.GetComponent<Rigidbody>().velocity);
+                //Debug.Log("Rigidbody velocity after detaching: " + this.gameObject.GetComponent<Rigidbody>().velocity);
                 this.gameObject.GetComponent<Rigidbody>().isKinematic = true;
                 this.gameObject.GetComponent<CharacterController>().enabled = true;
                 m_MoveDir = newVelocity;
@@ -220,8 +220,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 playerModelAngle = 0f;
             }
 
+            /*
             debugWebTrajectory.transform.localRotation = Quaternion.Euler(45, 0, 0);
             debugWebTrajectory.transform.localPosition = new Vector3(0, 0, 0.75f * Mathf.Cos(45 * (Mathf.PI / 180)));
+            */
         }
 
         private void PlayLandingSound()
@@ -343,7 +345,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             if (m_CharacterController.velocity.magnitude > 0 && m_CharacterController.isGrounded)
             {
-                m_Camera.transform.localPosition =
+                //m_Camera.transform.localPosition =
                     m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
                                       (speed * (m_IsWalking ? 1f : m_RunstepLenghten)));
                 newCameraPosition = mainCamera.transform.position;
@@ -354,7 +356,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 newCameraPosition = mainCamera.transform.position;
                 //newCameraPosition.y = m_OriginalCameraPosition.y - m_JumpBob.Offset();
             }
-            m_Camera.transform.position = newCameraPosition;
+            //m_Camera.transform.position = newCameraPosition;
         }
 
 
