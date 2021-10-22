@@ -44,4 +44,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   collectibles: []
-  collectibleCounter: {fileID: 0}
+  collectibleCounter: {fileID: 373218175901524424, guid: 47282ea83e2dccf4bbd4f572b23d086b,
+    type: 3}
