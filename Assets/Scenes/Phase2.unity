@@ -737,6 +737,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 1569263949}
   adjustmentSpeed: 50
+  angleAdjustmentSpeed: 5
 --- !u!1 &1159311298 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: 0f0a0724ffb676f40acda2ed1b55b149,
