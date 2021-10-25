@@ -66,6 +66,8 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        bool wasGrounded = isGrounded;
+
         // perform a test to see if the player is grounded
         rb.position += Vector3.up * groundedSweepDist * 0.5f;
         RaycastHit hit;     // we dont use this but its necessary for the SweepTest
@@ -75,9 +77,12 @@ public class PlayerController : MonoBehaviour
 
         if (isGrounded)
         {
-            // move the spider so its facing up right
-            rb.rotation = Quaternion.Euler(0, rb.rotation.eulerAngles.y, 0);
+            // rotate the spider so its facing up right
+            transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
             rb.constraints = RigidbodyConstraints.FreezeRotation;
+
+            // move the spider down so its touching the ground
+            if (!wasGrounded) transform.position = hit.point + (hit.distance + groundedSweepDist * 0.5f) * Vector3.up;
         }
         else if(!isGrounded && isSwinging)
         {
