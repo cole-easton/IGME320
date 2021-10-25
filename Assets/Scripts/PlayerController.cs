@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Spider;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
@@ -21,6 +22,12 @@ public class PlayerController : MonoBehaviour
     private float rotationDeadzone = 0.1f;
     [SerializeField] [Range(0, 20)]
     private float jumpSpeed = 7;
+    [SerializeField] [Range(0, 20)]
+    private float webShootDistance = 15;
+    [SerializeField] [Range(0, 90)]
+    private float webShootAngle = 15;
+    [SerializeField]
+    private Vector3 webAnchorPoint;
 
     private const float groundedSweepDist = 0.1f;
 
@@ -31,13 +38,19 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 directionInput;
     private bool jump;
+    private bool fireWeb;
 
     private Vector2 lerpAmount;   // used to slowly start moving
+
+    private GameObject webObject;
+    private Web web;
 
     // Start is called before the first frame update
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        webObject = new GameObject("player web object");
+        web = webObject.AddComponent<Web>();
     }
 
     // Update is called once per frame
@@ -50,6 +63,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))  directionInput.x -= 1;
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) directionInput.x += 1;
         if (Input.GetKeyDown(KeyCode.Space))                             jump = true;
+        if (Input.GetKeyDown(KeyCode.E))                                 fireWeb = true;
     }
 
     private void FixedUpdate()
@@ -61,7 +75,7 @@ public class PlayerController : MonoBehaviour
         rb.position -= Vector3.up * groundedSweepDist * 0.5f;
 
 
-        if (isGrounded && !isSwinging)
+        if (isGrounded)
         {
             // move the spider so its facing up right
             rb.rotation = Quaternion.Euler(0, rb.rotation.eulerAngles.y, 0);
@@ -81,8 +95,9 @@ public class PlayerController : MonoBehaviour
             Friction();
         }
         if (!isGrounded) AirControl();
-        if (!isSwinging) Turn();
+        if (!isSwinging || isGrounded) Turn();
         if (jump) Jump();
+        if (fireWeb) FireWeb();
     }
 
     private void Move()
@@ -169,6 +184,50 @@ public class PlayerController : MonoBehaviour
     {
         jump = false;
         if (isGrounded) rb.AddForce(0.0f, -rb.velocity.y + jumpSpeed, 0.0f, ForceMode.VelocityChange);
+    }
+
+    private void FireWeb()
+    {
+        fireWeb = false;
+
+        if (!isSwinging)
+        {
+            // get the direction to shoot the web
+            UnityEngine.Camera camera = UnityEngine.Camera.main;
+            Vector3 cameraForward = camera.transform.forward;
+            Vector3 cameraUp = camera.transform.up;
+            Vector3 direction = Vector3.RotateTowards(cameraForward, cameraUp, Mathf.Deg2Rad * webShootAngle, 0f).normalized;
+            Vector3 origin = Vector3.Project(transform.position - camera.transform.position, direction) + camera.transform.position;
+
+            // raycast and see if we hit something
+            RaycastHit[] hits = Physics.RaycastAll(origin, direction, webShootDistance);
+            Vector3 nearestHit = camera.transform.position + direction * webShootDistance;
+            float nearestDist = float.PositiveInfinity;
+            bool isHit = false;
+            for (int i = 0; i < hits.Length; i++)
+            {
+                if (hits[i].distance < nearestDist)
+                {
+                    isHit = true;
+                    nearestDist = hits[i].distance;
+                    nearestHit = hits[i].point;
+                }
+            }
+
+            // make a web to nearest hit and lock it if we hit something
+            web.CreateRope(nearestHit, transform.position /*+ transform.TransformPoint(webAnchorPoint)*/);
+            web.AttachTail(gameObject, webAnchorPoint);
+            if (isHit)
+            {
+                web.IsHeadLocked = true;
+                isSwinging = true;
+            }
+        }
+        else if (isSwinging)
+        {
+            web.DestroyRope();
+            isSwinging = false;
+        }
     }
 
     private float lerpInput(float direction, float currentAmount)

@@ -15,8 +15,7 @@ namespace Spider
 
         [SerializeField]
         private bool simulateOnStart;   // should the rope pre-simulate when it is created?    NOT IMPLEMENTED
-        [SerializeField]
-        [Range(0, 0.1f)]
+        [SerializeField] [Range(0, 0.1f)]
         private float dampening;        // how much the rope swinging is dampened
 
         [Space]
@@ -58,6 +57,9 @@ namespace Spider
         {
             lr = GetComponent<LineRenderer>();
             lr.useWorldSpace = true;
+            lr.startWidth = 0.05f;
+            lr.endWidth = 0.05f;
+            lr.material = (Material)Resources.Load("RopeMat", typeof(Material));
 
             points = new List<RopePoint>();
             segments = new List<RopeSegment>();
@@ -93,9 +95,12 @@ namespace Spider
 
         private void FixedUpdate()
         {
-            Simulate();
-            Constraint();
-            MoveAttachments();
+            if (isAlive)
+            {
+                Simulate();
+                Constraint();
+                MoveAttachments();
+            }
         }
 
         private void Draw()
@@ -202,7 +207,7 @@ namespace Spider
             if (IsHeadAttached)
             {
                 Rigidbody rb = head.attachment.GetComponent<Rigidbody>();
-                if (rb != null && rb.isKinematic == false)
+                if (rb != null && rb.isKinematic == false && (tail.isLocked || IsTailAttached))
                 {
                     Vector3 attachPoint = head.attachment.transform.TransformPoint(head.attachmentPoint);   // the attach point in world space
 
@@ -225,7 +230,7 @@ namespace Spider
             if (IsTailAttached)
             {
                 Rigidbody rb = tail.attachment.GetComponent<Rigidbody>();
-                if (rb != null && rb.isKinematic == false)
+                if (rb != null && rb.isKinematic == false && (head.isLocked || IsHeadAttached))
                 {
                     Vector3 attachPoint = tail.attachment.transform.TransformPoint(tail.attachmentPoint);   // the attach point in world space
 

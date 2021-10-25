@@ -1693,6 +1693,9 @@ MonoBehaviour:
   turnSpeed: 360
   rotationDeadzone: 0.1
   jumpSpeed: 7
+  webShootDistance: 15
+  webShootAngle: 15
+  webAnchorPoint: {x: 0, y: 0, z: 0}
 --- !u!1 &5987755153130748152
 GameObject:
   m_ObjectHideFlags: 0
