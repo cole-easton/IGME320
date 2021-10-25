@@ -1696,7 +1696,7 @@ MonoBehaviour:
   rotationDeadzone: 0.1
   jumpSpeed: 7
   webShootDistance: 15
-  webShootAngle: 15
+  webShootAngle: 5
   webAnchorPoint: {x: 0, y: 0, z: 0}
 --- !u!120 &5232485344239438265
 LineRenderer:
