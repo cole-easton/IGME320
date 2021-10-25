@@ -42,15 +42,13 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 lerpAmount;   // used to slowly start moving
 
-    private GameObject webObject;
     private Web web;
 
     // Start is called before the first frame update
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-        webObject = new GameObject("player web object");
-        web = webObject.AddComponent<Web>();
+        web = GetComponent<Web>();
     }
 
     // Update is called once per frame
