@@ -57,9 +57,6 @@ namespace Spider
         {
             lr = GetComponent<LineRenderer>();
             lr.useWorldSpace = true;
-            lr.startWidth = 0.05f;
-            lr.endWidth = 0.05f;
-            lr.material = (Material)Resources.Load("RopeMat", typeof(Material));
 
             points = new List<RopePoint>();
             segments = new List<RopeSegment>();
