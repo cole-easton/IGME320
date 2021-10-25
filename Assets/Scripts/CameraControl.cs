@@ -23,7 +23,7 @@ public class CameraControl : MonoBehaviour
     void Start()
     {
         initialPos = new Vector3(horizontalRadius * Mathf.Cos(horizontalAngle * Mathf.PI / 180), 10, horizontalRadius * Mathf.Sin(horizontalAngle * Mathf.PI / 180));
-        gameObject.transform.position = initialPos;
+        //gameObject.transform.position = initialPos;
         initialTargetPos = target.transform.position;
         mouseXInitialValue = Input.GetAxis("Mouse X");
         mouseYInitialValue = Input.GetAxis("Mouse Y");
@@ -31,6 +31,9 @@ public class CameraControl : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        Vector3 goalPos = initialPos + target.transform.position;
+        gameObject.transform.position = goalPos;
     }
 
     // Update is called once per frame
@@ -40,8 +43,8 @@ public class CameraControl : MonoBehaviour
         if (!isAiming)
         {
             verticalAngle -= (int)(angleAdjustmentSpeed * (Input.GetAxis("Mouse Y") - mouseYInitialValue));
-            if (verticalAngle < 0)
-                verticalAngle = 0;
+            if (verticalAngle < -90)
+                verticalAngle = -90;
             if (verticalAngle > 90)
                 verticalAngle = 90;
         }
@@ -88,10 +91,21 @@ public class CameraControl : MonoBehaviour
         if (!isAiming)
         {
             transform.rotation = Quaternion.Euler(verticalAngle, -(horizontalAngle - 270), 0);
-            horizontalRadius = verticalRadius * Mathf.Cos(verticalAngle * Mathf.PI / 180);
-            initialPos = new Vector3(horizontalRadius * Mathf.Cos(horizontalAngle * Mathf.PI / 180),
-                verticalRadius * Mathf.Sin(verticalAngle * Mathf.PI / 180) + 7.5f,
-                horizontalRadius * Mathf.Sin(horizontalAngle * Mathf.PI / 180));
+            if (verticalAngle > 0)
+            {
+                horizontalRadius = verticalRadius * Mathf.Cos(verticalAngle * Mathf.PI / 180);
+                initialPos = new Vector3(horizontalRadius * Mathf.Cos(horizontalAngle * Mathf.PI / 180),
+                    verticalRadius * Mathf.Sin(verticalAngle * Mathf.PI / 180) + 7.5f,
+                    horizontalRadius * Mathf.Sin(horizontalAngle * Mathf.PI / 180));
+            }
+            
+            else
+            {
+                initialPos = new Vector3(horizontalRadius * Mathf.Cos(horizontalAngle * Mathf.PI / 180),
+                    verticalRadius * Mathf.Sin(0 * Mathf.PI / 180) + 7.5f,
+                    horizontalRadius * Mathf.Sin(horizontalAngle * Mathf.PI / 180));
+            }
+            
             Vector3 goalPos = initialPos + target.transform.position - initialTargetPos;
             transform.position += (goalPos - transform.position) * adjustmentSpeed * Time.deltaTime;
         }
