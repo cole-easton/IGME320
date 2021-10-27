@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 directionInput;
     private bool jump;
     private bool fireWeb;
+    private bool releaseWeb;
 
     private Vector2 lerpAmount;   // used to slowly start moving
 
@@ -61,7 +62,8 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))  directionInput.x -= 1;
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) directionInput.x += 1;
         if (Input.GetKeyDown(KeyCode.Space))                             jump = true;
-        if (Input.GetKeyDown(KeyCode.E))                                 fireWeb = true;
+        if (Input.GetKeyDown(KeyCode.E) || Input.GetMouseButtonDown(0))  fireWeb = true;
+        if (Input.GetKeyUp(KeyCode.E) || Input.GetMouseButtonUp(0))      releaseWeb = true;
     }
 
     private void FixedUpdate()
@@ -101,6 +103,7 @@ public class PlayerController : MonoBehaviour
         if (!isSwinging || isGrounded) Turn();
         if (jump) Jump();
         if (fireWeb) FireWeb();
+        if (releaseWeb) ReleaseWeb();
     }
 
     private void Move()
@@ -219,17 +222,26 @@ public class PlayerController : MonoBehaviour
 
             // make a web to nearest hit and lock it if we hit something
             web.CreateRope(nearestHit, transform.position /*+ transform.TransformPoint(webAnchorPoint)*/);
-            web.AttachTail(gameObject, webAnchorPoint);
+            
             if (isHit)
             {
+                web.AttachTail(gameObject, webAnchorPoint);
                 web.IsHeadLocked = true;
                 isSwinging = true;
             }
         }
-        else if (isSwinging)
+    }
+
+    private void ReleaseWeb()
+    {
+        if (releaseWeb)
         {
-            web.DestroyRope();
-            isSwinging = false;
+            releaseWeb = false;
+            if (isSwinging)
+            {
+                web.DestroyRope();
+                isSwinging = false;
+            }
         }
     }
 

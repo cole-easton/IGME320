@@ -34,8 +34,8 @@ public class MatthewCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        theta -= Time.deltaTime * sensitivity.x * (Input.GetAxis("Mouse X") - initialMouse.x);
-        omega += Time.deltaTime * sensitivity.y * (Input.GetAxis("Mouse Y") - initialMouse.y);
+        theta -= sensitivity.x * (Input.GetAxis("Mouse X") - initialMouse.x);
+        omega += sensitivity.y * (Input.GetAxis("Mouse Y") - initialMouse.y);
 
         theta = theta % 360f;
         omega = Mathf.Clamp(omega, 0.5f, 170f);

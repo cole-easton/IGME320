@@ -8,15 +8,16 @@ namespace Spider
     [RequireComponent(typeof(LineRenderer))]
     public class Web : MonoBehaviour
     {
-        private const float segmentLength = 0.1f;
         private const int contraintIterations = 50;
 
         //------------------------------------------members-----------------------------------//
 
         [SerializeField]
-        private bool simulateOnStart;   // should the rope pre-simulate when it is created?    NOT IMPLEMENTED
+        private float segmentLength = 0.5f;
+        [SerializeField]
+        private bool simulateOnStart = false;   // should the rope pre-simulate when it is created?    NOT IMPLEMENTED
         [SerializeField] [Range(0, 0.1f)]
-        private float dampening;        // how much the rope swinging is dampened
+        private float dampening = 0.05f;        // how much the rope swinging is dampened
 
         [Space]
 
@@ -191,9 +192,9 @@ namespace Spider
                     }
                     else
                     {
-                        Vector3 midpoint = (segment.A.position + segment.B.position) / 2.0f;   // find the midpoint between the two points
-                        segment.A.position = midpoint + (dir * segment.length / 2.0f);         // move both points so they are a half length from the midpoint
-                        segment.B.position = midpoint - (dir * segment.length / 2.0f);         // two half lengths make a full length
+                        Vector3 midpoint = (segment.A.position + segment.B.position) * 0.5f;   // find the midpoint between the two points
+                        segment.A.position = midpoint + (dir * segment.length * 0.5f);         // move both points so they are a half length from the midpoint
+                        segment.B.position = midpoint - (dir * segment.length * 0.5f);         // two half lengths make a full length
                     }
                 }
             }
@@ -401,7 +402,7 @@ namespace Spider
             public RopePoint B;
             public float length;
 
-            public RopeSegment(RopePoint A, RopePoint B, float length = segmentLength)
+            public RopeSegment(RopePoint A, RopePoint B, float length)
             {
                 this.A = A;
                 this.B = B;
