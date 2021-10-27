@@ -883,6 +883,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: WebObject
       objectReference: {fileID: 0}
+    - target: {fileID: 5410743818744920833, guid: 83e7510a73dcbe04697f8a2a15ef21e4,
+        type: 3}
+      propertyPath: segmentLength
+      value: 0.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 83e7510a73dcbe04697f8a2a15ef21e4, type: 3}
 --- !u!224 &621651005 stripped

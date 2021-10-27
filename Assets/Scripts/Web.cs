@@ -8,7 +8,8 @@ namespace Spider
     [RequireComponent(typeof(LineRenderer))]
     public class Web : MonoBehaviour
     {
-        private const float segmentLength = 0.1f;
+        [SerializeField]
+        private float segmentLength = 0.1f;
         private const int contraintIterations = 50;
 
         //------------------------------------------members-----------------------------------//
@@ -401,7 +402,7 @@ namespace Spider
             public RopePoint B;
             public float length;
 
-            public RopeSegment(RopePoint A, RopePoint B, float length = segmentLength)
+            public RopeSegment(RopePoint A, RopePoint B, float length)
             {
                 this.A = A;
                 this.B = B;
