@@ -219,9 +219,9 @@ public class PlayerController : MonoBehaviour
 
             // make a web to nearest hit and lock it if we hit something
             web.CreateRope(nearestHit, transform.position /*+ transform.TransformPoint(webAnchorPoint)*/);
-            web.AttachTail(gameObject, webAnchorPoint);
             if (isHit)
             {
+                web.AttachTail(gameObject, webAnchorPoint);
                 web.IsHeadLocked = true;
                 isSwinging = true;
             }
