@@ -1004,12 +1004,12 @@ PrefabInstance:
     - target: {fileID: 4457602924281339038, guid: 3e9cb513dbdac4e439d63ac05fc968ea,
         type: 3}
       propertyPath: sensitivity.x
-      value: 50
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4457602924281339038, guid: 3e9cb513dbdac4e439d63ac05fc968ea,
         type: 3}
       propertyPath: sensitivity.y
-      value: 25
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3e9cb513dbdac4e439d63ac05fc968ea, type: 3}
