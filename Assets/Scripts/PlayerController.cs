@@ -204,7 +204,7 @@ public class PlayerController : MonoBehaviour
 
             // raycast and see if we hit something
             RaycastHit[] hits = Physics.RaycastAll(origin, direction, webShootDistance);
-            Vector3 nearestHit = camera.transform.position + direction * webShootDistance;
+            Vector3 nearestHit = origin + direction * webShootDistance;
             float nearestDist = float.PositiveInfinity;
             bool isHit = false;
             for (int i = 0; i < hits.Length; i++)
