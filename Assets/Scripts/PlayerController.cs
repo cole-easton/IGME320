@@ -84,7 +84,7 @@ public class PlayerController : MonoBehaviour
             rb.constraints = RigidbodyConstraints.FreezeRotation;
 
             // move the spider down so its touching the ground
-            if (!wasGrounded) transform.position = hit.point + (hit.distance + groundedSweepDist * 0.5f) * Vector3.up;
+            // if (!wasGrounded) transform.position = hit.point + (hit.distance + groundedSweepDist * 0.5f) * Vector3.up;
         }
         else if(!isGrounded && isSwinging)
         {
