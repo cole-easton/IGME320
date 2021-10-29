@@ -74,6 +74,10 @@ namespace Spider
 				}
 				if (FindObjectOfType<CollectibleManager>().IsClear)
 				{
+					if (respawnTextObj != null)
+					{
+						respawnTextObj.text = respawnText;
+					}
 					// Reload scene
 					UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
 				}
