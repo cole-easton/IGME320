@@ -1,52 +1,75 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Spider;
 
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Web))]
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] [Range(0,20)]
-    private float maxGroundSpeed = 8.0f;
-    [SerializeField] [Range(0,20)]
-    private float frictionSpeed = 20.0f;
-    [SerializeField] [Range(0,5)]
-    private float groundSpeedGrowth = 3.0f;
-    [SerializeField] [Range(0, 5)]
-    private float groundSpeedFalloff = 5.0f;
-    [SerializeField] [Range(0, 1000)]
-    private float airForce = 500.0f;
-    [SerializeField] [Range(0,360)]
-    private float turnSpeed = 360.0f;
-    [SerializeField] [Range(0, 5)]
-    private float rotationDeadzone = 0.1f;
-    [SerializeField] [Range(0, 20)]
-    private float jumpSpeed = 7;
-    [SerializeField] [Range(0, 20)]
-    private float webShootDistance = 15;
-    [SerializeField] [Range(0, 90)]
-    private float webShootAngle = 15;
-    [SerializeField]
-    private Vector3 webAnchorPoint;
+	#region Members
+	#region Serialized
+	[SerializeField]
+	[Range(0, 20)]
+	private float maxGroundSpeed = 8.0f;
+	[SerializeField]
+	[Range(0, 20)]
+	private float frictionSpeed = 20.0f;
+	[SerializeField]
+	[Range(0, 5)]
+	private float groundSpeedGrowth = 3.0f;
+	[SerializeField]
+	[Range(0, 5)]
+	private float groundSpeedFalloff = 5.0f;
+	[SerializeField]
+	[Range(0, 1000)]
+	private float airForce = 500.0f;
+	[SerializeField]
+	[Range(0, 360)]
+	private float turnSpeed = 360.0f;
+	[SerializeField]
+	[Range(0, 5)]
+	private float rotationDeadzone = 0.1f;
+	[SerializeField]
+	[Range(0, 20)]
+	private float jumpSpeed = 7;
+	[SerializeField]
+	[Range(0, 20)]
+	private float webShootDistance = 15;
+	[SerializeField]
+	[Range(0, 90)]
+	private float webShootAngle = 15;
+	[SerializeField]
+	private Vector3 webAnchorPoint;
+	[SerializeField]
+	[Tooltip("Crosshair object")]
+	private UnityEngine.UI.Image crosshair;
+	[SerializeField]
+	[Tooltip("Green Crosshair")]
+	private Sprite crosshairGreen;
+	[SerializeField]
+	[Tooltip("Red Crosshair")]
+	private Sprite crosshairRed;
+	#endregion
 
-    private const float groundedSweepDist = 0.1f;
+	private const float groundedSweepDist = 0.1f;
 
-    private Rigidbody rb;
+	private Rigidbody rb;
+	private Web web;
 
-    private bool isGrounded = false;
-    private bool isSwinging = false;
+	private Vector2 directionInput;
 
-    private Vector2 directionInput;
-    private bool jump;
-    private bool fireWeb;
-    private bool releaseWeb;
+	#region State Change Vars
+	private bool isGrounded = false;
+	private bool isSwinging = false;
+	private bool jump = false;
+	private bool fireWeb = false;
+	private bool releaseWeb = false;
+	#endregion
 
-    private Vector2 lerpAmount;   // used to slowly start moving
+	private Vector2 lerpAmount;   // used to slowly start moving
+	#endregion
 
-    private Web web;
-
-    // Start is called before the first frame update
-    private void Start()
+	// Start is called before the first frame update
+	private void Start()
     {
         rb = GetComponent<Rigidbody>();
         web = GetComponent<Web>();
@@ -64,7 +87,29 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))                             jump = true;
         if (Input.GetKeyDown(KeyCode.E) || Input.GetMouseButtonDown(0))  fireWeb = true;
         if (Input.GetKeyUp(KeyCode.E) || Input.GetMouseButtonUp(0))      releaseWeb = true;
-    }
+
+		// get the direction to shoot the web
+		Transform cTrans = Camera.main.transform;
+		Vector3 direction = Vector3.RotateTowards(
+			cTrans.forward,
+			cTrans.up,
+			Mathf.Deg2Rad * webShootAngle,
+			0f).normalized;
+		Vector3 origin = Vector3.Project(transform.position - cTrans.position, direction) + cTrans.position;
+
+		// raycast and see if we hit something
+		RaycastHit[] hits = Physics.RaycastAll(origin, direction, webShootDistance);
+		bool isHit = false;
+		for (int i = 0; i < hits.Length; i++)
+		{
+			if (hits[i].distance < webShootDistance)
+			{
+				isHit = true;
+				break;
+			}
+		}
+		crosshair.sprite = (isHit) ? crosshairGreen : crosshairRed;
+	}
 
     private void FixedUpdate()
     {
@@ -199,7 +244,7 @@ public class PlayerController : MonoBehaviour
         if (!isSwinging)
         {
             // get the direction to shoot the web
-            UnityEngine.Camera camera = UnityEngine.Camera.main;
+            Camera camera = Camera.main;
             Vector3 cameraForward = camera.transform.forward;
             Vector3 cameraUp = camera.transform.up;
             Vector3 direction = Vector3.RotateTowards(cameraForward, cameraUp, Mathf.Deg2Rad * webShootAngle, 0f).normalized;
@@ -256,18 +301,18 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 GetRelativeCameraForward()
     {
-        Vector3 cameraForward = UnityEngine.Camera.main.transform.forward;
+        Vector3 cameraForward = Camera.main.transform.forward;
         if (cameraForward.x <= 0.1f && cameraForward.x >= -0.1f && cameraForward.z <= 0.1f && cameraForward.z >= -0.1f) // if the camera is pointing roughly up or down
         {
-            if(cameraForward.y > 0) cameraForward = -UnityEngine.Camera.main.transform.up;
-            else if(cameraForward.y < 0) cameraForward = UnityEngine.Camera.main.transform.up;
+            if(cameraForward.y > 0) cameraForward = -Camera.main.transform.up;
+            else if(cameraForward.y < 0) cameraForward = Camera.main.transform.up;
         }
         return new Vector2(cameraForward.x, cameraForward.z).normalized;
     }
 
     private Vector2 GetRelativeCameraRight()
     {
-        Vector3 cameraRight = UnityEngine.Camera.main.transform.right;
+        Vector3 cameraRight = Camera.main.transform.right;
         return new Vector2(cameraRight.x, cameraRight.z).normalized;
     }
 }

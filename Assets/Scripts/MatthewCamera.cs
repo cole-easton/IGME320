@@ -1,22 +1,25 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MatthewCamera : MonoBehaviour
 {
-    [SerializeField] [Range(0,20)]
-    private float radius = 10;
-    [SerializeField]
-    private Vector2 sensitivity;
-    private float theta = 0;
-    private float omega = 60;
+	#region Members
+	#region Serialized Fields
+	[SerializeField]
+	[Range(0, 20)]
+	private float radius = 10;
+	[SerializeField]
+	private Vector2 sensitivity = new Vector2(200, 100);
+	#endregion
+	private float theta = 0;
+	private float omega = 60;
 
-    private Transform player;
+	private Transform player;
 
-    private Vector2 initialMouse;
+	private Vector2 initialMouse;
+	#endregion
 
-    // Start is called before the first frame update
-    void Start()
+	// Start is called before the first frame update
+	void Start()
     {
         initialMouse.x = Input.GetAxis("Mouse X");
         initialMouse.y = Input.GetAxis("Mouse Y");
@@ -50,7 +53,11 @@ public class MatthewCamera : MonoBehaviour
     {
         float radiansTheta = theta * Mathf.Deg2Rad;
         float radiansOmega = omega * Mathf.Deg2Rad;
-        Vector3 positionOffset = new Vector3(radius * Mathf.Cos(radiansTheta) * Mathf.Sin(radiansOmega), radius * Mathf.Cos(radiansOmega), radius * Mathf.Sin(radiansTheta) * Mathf.Sin(radiansOmega));
+
+        Vector3 positionOffset = new Vector3(
+			radius * Mathf.Cos(radiansTheta) * Mathf.Sin(radiansOmega), 
+			radius * Mathf.Cos(radiansOmega),
+			radius * Mathf.Sin(radiansTheta) * Mathf.Sin(radiansOmega));
 
         // raycast to the camera and see if we hit anything
         RaycastHit[] hits = Physics.RaycastAll(player.position, positionOffset, radius);
@@ -65,8 +72,9 @@ public class MatthewCamera : MonoBehaviour
             }
         }
 
-        // push in the camera
-        if (!float.IsInfinity(nearestDist)) return nearestHit;
-        else return player.position + positionOffset;
-    }
+		// push in the camera
+		//if (!float.IsInfinity(nearestDist)) return nearestHit;
+		//else return player.position + positionOffset;
+		return (!float.IsInfinity(nearestDist)) ? nearestHit : player.position + positionOffset;
+	}
 }
