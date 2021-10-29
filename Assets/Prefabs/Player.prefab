@@ -1698,6 +1698,9 @@ MonoBehaviour:
   webShootDistance: 15
   webShootAngle: 5
   webAnchorPoint: {x: 0, y: 0, z: 0}
+  crosshair: {fileID: 0}
+  crosshairGreen: {fileID: 21300000, guid: 9367279d1c6629345ba7935f19554017, type: 3}
+  crosshairRed: {fileID: 21300000, guid: 39a3df46e0e39184db66ea98f85f34b1, type: 3}
 --- !u!120 &5232485344239438265
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -1812,12 +1815,24 @@ MonoBehaviour:
   head:
     point:
       position: {x: 0, y: 0, z: 0}
+    segment:
+      A:
+        position: {x: 0, y: 0, z: 0}
+      B:
+        position: {x: 0, y: 0, z: 0}
+      length: 0
     isLocked: 0
     attachment: {fileID: 0}
     attachmentPoint: {x: 0, y: 0, z: 0}
   tail:
     point:
       position: {x: 0, y: 0, z: 0}
+    segment:
+      A:
+        position: {x: 0, y: 0, z: 0}
+      B:
+        position: {x: 0, y: 0, z: 0}
+      length: 0
     isLocked: 0
     attachment: {fileID: 0}
     attachmentPoint: {x: 0, y: 0, z: 0}

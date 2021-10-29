@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Spider
 {
@@ -40,7 +41,15 @@ namespace Spider
 		/// </summary>
 		[SerializeField]
 		[Tooltip("Default stage clear text.")]
-		private string clearText = "Congratulations! You've finished! To reset, press R.";
+		//private string clearText = "Congratulations! You've finished! To reset, press R.";
+		private string clearText = "Congratulations! You've finished! To go to the next level, press R.";
+
+		///// <summary>
+		///// Levels, in order.
+		///// </summary>
+		//[SerializeField]
+		//[Tooltip("Levels, in order.")]
+		//private Scene[] levels;
 
 		void Start()
 		{
@@ -60,6 +69,10 @@ namespace Spider
 			if (respawnTextObj != null)
 			{
 				respawnTextObj.text = clearText;
+				if (SceneManager.GetActiveScene().buildIndex == 1)
+				{
+					respawnTextObj.text = "Congratulations! You've finished! To start over, press R.";
+				}
 			}
 		}
 
@@ -79,7 +92,11 @@ namespace Spider
 						respawnTextObj.text = respawnText;
 					}
 					// Reload scene
-					UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+					//SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+					if (SceneManager.GetActiveScene().buildIndex >= SceneManager.sceneCountInBuildSettings - 1)
+						SceneManager.LoadScene(0);
+					else
+						SceneManager.LoadScene(SceneManager.GetActiveScene().handle + 1);
 				}
 			}
 		}

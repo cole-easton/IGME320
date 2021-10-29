@@ -48,4 +48,4 @@ MonoBehaviour:
   respawnTextObj: {fileID: 1029606233829023538, guid: 9fd0f96876eb9af47821eff50b08421d,
     type: 3}
   respawnText: To teleport to the top, press R.
-  clearText: Congratulations! You've finished! To reset, press R
+  clearText: Congratulations! You've finished! To go to the next level, press R.
